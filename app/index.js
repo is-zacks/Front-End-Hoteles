@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
@@ -30,153 +31,155 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Carrusel decorativo */}
-      <View style={styles.carouselWrapper}>
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          style={styles.carousel}
-        >
-          {[1, 2, 3].map((i) => (
-            <Image
-              key={i}
-              source={require('../assets/catedral.jpeg')}
-              style={styles.carouselImage}
-            />
-          ))}
-        </ScrollView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <ScrollView style={styles.container}>
+        {/* Carrusel decorativo */}
+        <View style={styles.carouselWrapper}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            style={styles.carousel}
+          >
+            {[1, 2, 3].map((i) => (
+              <Image
+                key={i}
+                source={require('../assets/catedral.jpeg')}
+                style={styles.carouselImage}
+              />
+            ))}
+          </ScrollView>
 
-        {/* Iconos de login y registro sobre la imagen */}
-        <View style={styles.authButtonsContainerAbsolute}>
-          <TouchableOpacity style={styles.authButton} onPress={() => router.push('/registro')}>
-            <FontAwesome name="user-plus" size={18} color="#fff" />
-            <Text style={[styles.authButtonText, { color: '#fff' }]}>Crear Cuenta</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.authButton} onPress={() => router.push('/login')}>
-            <FontAwesome name="user" size={18} color="#fff" />
-            <Text style={[styles.authButtonText, { color: '#fff' }]}>Iniciar Sesión</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Hero (titulo sobre la imagen) */}
-      <View style={styles.overlay}>
-        <Text style={styles.title}>Descubre los mejores</Text>
-        <Text style={styles.title}>Hoteles en Morelia</Text>
-      </View>
-
-      {/* Buscador */}
-      <View style={styles.searchBox}>
-        <Text style={styles.searchTitle}>Descubre</Text>
-        <Text style={styles.searchSubtitle}>Encuentra la mejor opción para ti</Text>
-
-        <View style={styles.inputRow}>
-          <TouchableOpacity style={styles.input} onPress={() => setShowPicker(true)}>
-            <FontAwesome name="calendar" size={16} color="#333" />
-            <Text style={{ marginLeft: 6 }}>{date.toLocaleDateString()}</Text>
-          </TouchableOpacity>
-          {showPicker && (
-            <DateTimePicker
-              value={date}
-              mode="date"
-              display="default"
-              onChange={onChangeDate}
-            />
-          )}
-
-          <View style={styles.selectContainer}>
-            <MaterialIcons name="person" size={18} color="#333" style={{ marginRight: 4 }} />
-            <Picker
-              selectedValue={ocupacion}
-              style={styles.picker}
-              onValueChange={(itemValue) => setOcupacion(itemValue)}
-            >
-              <Picker.Item label="Disponibilidad" value="disponible" />
-              <Picker.Item label="Ocupado" value="ocupado" />
-            </Picker>
-          </View>
-
-          <View style={styles.selectContainer}>
-            <MaterialIcons name="attach-money" size={18} color="#333" style={{ marginRight: 4 }} />
-            <Picker
-              selectedValue={precio}
-              style={styles.picker}
-              onValueChange={(itemValue) => setPrecio(itemValue)}
-            >
-              <Picker.Item label="Mejores Precios" value="mejor-precio" />
-              <Picker.Item label="Más Caros" value="mas-caros" />
-            </Picker>
+          {/* Iconos de login y registro sobre la imagen */}
+          <View style={[styles.authButtonsContainerAbsolute, { zIndex: 50 }]}>
+            <TouchableOpacity style={styles.authButton} onPress={() => router.push('/registro')}>
+              <FontAwesome name="user-plus" size={18} color="#fff" />
+              <Text style={[styles.authButtonText, { color: '#fff' }]}>Crear Cuenta</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.authButton} onPress={() => router.push('/login')}>
+              <FontAwesome name="user" size={18} color="#fff" />
+              <Text style={[styles.authButtonText, { color: '#fff' }]}>Iniciar Sesión</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.searchButton}>
-          <Text style={styles.searchButtonText}>Buscar</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Hero (titulo sobre la imagen) */}
+        <View style={styles.overlay}>
+          <Text style={styles.title}>Descubre los mejores</Text>
+          <Text style={styles.title}>Hoteles en Morelia</Text>
+        </View>
 
-      {/* Links temporales para prueba de dashboards */}
-      <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
-        <Text
-          style={{ color: '#409eff', marginBottom: 8 }}
-          onPress={() => router.push('/dashboard/camaristas')}
-        >
-          Ir a Dashboard Camaristas
-        </Text>
-        <Text
-          style={{ color: '#409eff', marginBottom: 8 }}
-          onPress={() => router.push('/dashboard/mantenimiento')}
-        >
-          Ir a Dashboard Mantenimiento
-        </Text>
-        <Text
-          style={{ color: '#409eff' }}
-          onPress={() => router.push('/dashboard/admin')}
-        >
-          Ir a Dashboard Administrador
-        </Text>
-      </View>
+        {/* Buscador */}
+        <View style={styles.searchBox}>
+          <Text style={styles.searchTitle}>Descubre</Text>
+          <Text style={styles.searchSubtitle}>Encuentra la mejor opción para ti</Text>
 
-      {/* Categorías */}
-      <View style={styles.grid}>
-        {['Hoteles', 'Comida', 'Descubre Morelia', 'Servicios', 'Paquetes'].map((item, idx) => (
-          <TouchableOpacity key={idx} style={styles.card}>
-            <Image source={require('../assets/catedral.jpeg')} style={styles.cardImage} />
-            <View style={styles.cardOverlay}>
-              <Text style={styles.cardText}>{item}</Text>
+          <View style={styles.inputRow}>
+            <TouchableOpacity style={styles.input} onPress={() => setShowPicker(true)}>
+              <FontAwesome name="calendar" size={16} color="#333" />
+              <Text style={{ marginLeft: 6 }}>{date.toLocaleDateString()}</Text>
+            </TouchableOpacity>
+            {showPicker && (
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display="default"
+                onChange={onChangeDate}
+              />
+            )}
+
+            <View style={styles.selectContainer}>
+              <MaterialIcons name="person" size={18} color="#333" style={{ marginRight: 4 }} />
+              <Picker
+                selectedValue={ocupacion}
+                style={styles.picker}
+                onValueChange={(itemValue) => setOcupacion(itemValue)}
+              >
+                <Picker.Item label="Disponibilidad" value="disponible" />
+                <Picker.Item label="Ocupado" value="ocupado" />
+              </Picker>
             </View>
+
+            <View style={styles.selectContainer}>
+              <MaterialIcons name="attach-money" size={18} color="#333" style={{ marginRight: 4 }} />
+              <Picker
+                selectedValue={precio}
+                style={styles.picker}
+                onValueChange={(itemValue) => setPrecio(itemValue)}
+              >
+                <Picker.Item label="Mejores Precios" value="mejor-precio" />
+                <Picker.Item label="Más Caros" value="mas-caros" />
+              </Picker>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.searchButton}>
+            <Text style={styles.searchButtonText}>Buscar</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
 
-      {/* Hoteles Destacados */}
-      <View style={styles.hotelesContainer}>
-        <Text style={styles.hotelesTitle}>Elige el Hotel que más te convenga</Text>
-        <Text style={styles.hotelesSubtitle}>
-          Experiencias de todo tipo, vive y conoce la capital Michoacana.
-        </Text>
+        {/* Links temporales para prueba de dashboards */}
+        <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
+          <Text
+            style={{ color: '#409eff', marginBottom: 8 }}
+            onPress={() => router.push('/dashboard/camaristas')}
+          >
+            Ir a Dashboard Camaristas
+          </Text>
+          <Text
+            style={{ color: '#409eff', marginBottom: 8 }}
+            onPress={() => router.push('/dashboard/mantenimiento')}
+          >
+            Ir a Dashboard Mantenimiento
+          </Text>
+          <Text
+            style={{ color: '#409eff' }}
+            onPress={() => router.push('/dashboard/admin')}
+          >
+            Ir a Dashboard Administrador
+          </Text>
+        </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {[
-            { id: 1, name: 'Hotel Casa Madero', location: 'Av. Santa María 530', price: 699 },
-            { id: 2, name: 'Citi Express Morelia', location: 'Morelia Centro', price: 999 },
-            { id: 3, name: 'Hotel Catedral', location: 'Morelia Centro', price: 499 },
-          ].map((hotel) => (
-            <HotelCard
-              key={hotel.id}
-              hotel={hotel}
-              onPress={() => router.push(`/hotel/${hotel.id}`)}
-            />
+        {/* Categorías */}
+        <View style={styles.grid}>
+          {['Hoteles', 'Comida', 'Descubre Morelia', 'Servicios', 'Paquetes'].map((item, idx) => (
+            <TouchableOpacity key={idx} style={styles.card}>
+              <Image source={require('../assets/catedral.jpeg')} style={styles.cardImage} />
+              <View style={styles.cardOverlay}>
+                <Text style={styles.cardText}>{item}</Text>
+              </View>
+            </TouchableOpacity>
           ))}
-        </ScrollView>
-      </View>
+        </View>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2025 Hoteles de Morelia</Text>
-      </View>
-    </ScrollView>
+        {/* Hoteles Destacados */}
+        <View style={styles.hotelesContainer}>
+          <Text style={styles.hotelesTitle}>Elige el Hotel que más te convenga</Text>
+          <Text style={styles.hotelesSubtitle}>
+            Experiencias de todo tipo, vive y conoce la capital Michoacana.
+          </Text>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[
+              { id: 1, name: 'Hotel Casa Madero', location: 'Av. Santa María 530', price: 699 },
+              { id: 2, name: 'Citi Express Morelia', location: 'Morelia Centro', price: 999 },
+              { id: 3, name: 'Hotel Catedral', location: 'Morelia Centro', price: 499 },
+            ].map((hotel) => (
+              <HotelCard
+                key={hotel.id}
+                hotel={hotel}
+                onPress={() => router.push(`/hotel/${hotel.id}`)}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© 2025 Hoteles de Morelia</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

@@ -1,47 +1,55 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
+import { useRouter } from 'expo-router';
+import BaseScreen from '../components/BaseScreen';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
-
-  const handleLogin = () => {
-    console.log('Iniciar sesión con:', email, password);
-    router.back();
-  };
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: 'Iniciar Sesión',
-          headerShown: true,
-          gestureEnabled: true, // 👈 habilita el gesto de regreso
-        }}
-      />
-      <View className="flex-1 justify-center items-center px-6 bg-white">
-        <Text className="text-2xl font-bold mb-6">Bienvenido</Text>
+    <BaseScreen>
+      <View className="flex-1 justify-center space-y-8">
+        <View className="items-center">
+          <Text className="text-3xl font-bold text-[#2c2c66]">Iniciar sesión</Text>
+          <Text className="text-gray-500 mt-2 text-center px-8">
+            Ingresa para gestionar tus reservas y disfrutar de beneficios.
+          </Text>
+        </View>
 
-        <TextInput
-          className="border border-gray-300 p-3 rounded w-full mb-3"
-          placeholder="Correo electrónico"
-          onChangeText={setEmail}
-          value={email}
-        />
-        <TextInput
-          className="border border-gray-300 p-3 rounded w-full mb-6"
-          placeholder="Contraseña"
-          secureTextEntry
-          onChangeText={setPassword}
-          value={password}
-        />
+        <View className="space-y-4 ">
+          <TextInput
+            placeholder="Correo electrónico"
+            placeholderTextColor="#888"
+            className="bg-white px-4 py-3 m-3 rounded-lg border border-gray-300"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            placeholder="Contraseña"
+            placeholderTextColor="#888"
+            secureTextEntry
+            className="bg-white px-4 py-3 m-3 rounded-lg border border-gray-300"
+            value={password}
+            onChangeText={setPassword}
+          />
+        </View>
 
-        <TouchableOpacity className="bg-blue-600 px-6 py-3 rounded" onPress={handleLogin}>
-          <Text className="text-white font-semibold">Entrar</Text>
+        <TouchableOpacity
+          onPress={() => {/* lógica de login */}}
+          className="bg-[#4a7054] py-4 rounded-full items-center"
+        >
+          <Text className="text-white font-semibold text-lg">Entrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => router.push('/registro')}
+          className="items-center mt-4"
+        >
+          <Text className="text-[#4a7054] text-base font-semibold">¿No tienes cuenta? Regístrate</Text>
         </TouchableOpacity>
       </View>
-    </>
+    </BaseScreen>
   );
 }

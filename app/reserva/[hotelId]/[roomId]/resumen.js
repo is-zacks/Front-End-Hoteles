@@ -102,7 +102,7 @@ export default function ResumenReserva() {
           className="bg-[#4a7054] py-4 rounded-full items-center"
           onPress={() => alert('Reserva confirmada 🎉')}
         >
-          <Text className="text-white font-bold text-lg">Seleccionar método de pago</Text>
+          <Text className="text-white font-bold text-lg">Reservar</Text>
         </TouchableOpacity>
       </ScrollView>
     </BaseScreen>

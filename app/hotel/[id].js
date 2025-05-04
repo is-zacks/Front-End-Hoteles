@@ -11,6 +11,8 @@ import { useLayoutEffect } from 'react';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { hoteles } from '../../data/hoteles';
 import RoomCard from '../../components/RoomCard';
+import BaseScreen from '../../components/BaseScreen';
+
 
 const { width } = Dimensions.get('window');
 
@@ -42,50 +44,52 @@ export default function HotelScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      {/* Carrusel de imágenes */}
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        className="w-full h-56"
-      >
-        {hotel.imagenes.map((img, idx) => (
-          <Image
-            key={idx}
-            source={img}
-            style={{ width: width, height: 220 }}
-            resizeMode="cover"
-          />
-        ))}
+    <BaseScreen>
+      <ScrollView className="">
+        {/* Carrusel de imágenes */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          className="w-full h-56"
+        >
+          {hotel.imagenes.map((img, idx) => (
+            <Image
+              key={idx}
+              source={img}
+              style={{ width: width, height: 220 }}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+
+        {/* Información del hotel */}
+        <View className="px-4 mt-4">
+          <Text className="text-2xl font-bold text-gray-800">{hotel.name}</Text>
+
+          <View className="flex-row items-center mt-2">
+            <FontAwesome name="map-marker" size={16} color="#666" />
+            <Text className="ml-2 text-sm text-gray-500">{hotel.location}</Text>
+          </View>
+
+          <View className="flex-row items-center mt-1">
+            <FontAwesome name="phone" size={16} color="#666" />
+            <Text className="ml-2 text-sm text-gray-500">{hotel.phone}</Text>
+          </View>
+
+          <Text className="text-base text-gray-700 mt-4 leading-relaxed">
+            {hotel.description}
+          </Text>
+        </View>
+
+        {/* Habitaciones */}
+        <View className="px-4 mt-6 mb-12">
+          <Text className="text-lg font-semibold text-gray-800 mb-3">Habitaciones</Text>
+          {hotel.rooms.map((room) => (
+            <RoomCard key={room.id} room={room} hotelId={hotel.id} />
+          ))}
+        </View>
       </ScrollView>
-
-      {/* Información del hotel */}
-      <View className="px-4 mt-4">
-        <Text className="text-2xl font-bold text-gray-800">{hotel.name}</Text>
-
-        <View className="flex-row items-center mt-2">
-          <FontAwesome name="map-marker" size={16} color="#666" />
-          <Text className="ml-2 text-sm text-gray-500">{hotel.location}</Text>
-        </View>
-
-        <View className="flex-row items-center mt-1">
-          <FontAwesome name="phone" size={16} color="#666" />
-          <Text className="ml-2 text-sm text-gray-500">{hotel.phone}</Text>
-        </View>
-
-        <Text className="text-base text-gray-700 mt-4 leading-relaxed">
-          {hotel.description}
-        </Text>
-      </View>
-
-      {/* Habitaciones */}
-      <View className="px-4 mt-6 mb-12">
-        <Text className="text-lg font-semibold text-gray-800 mb-3">Habitaciones</Text>
-        {hotel.rooms.map((room) => (
-          <RoomCard key={room.id} room={room} />
-        ))}
-      </View>
-    </ScrollView>
+    </BaseScreen>
   );
 }

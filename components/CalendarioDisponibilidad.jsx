@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
-export default function CalendarioDisponibilidad() {
-  const [rango, setRango] = useState({});
-
+export default function CalendarioDisponibilidad({ rango, setRango }) {
   const seleccionarRango = (day) => {
     if (!rango.startDate || (rango.startDate && rango.endDate)) {
       setRango({ startDate: day.dateString, endDate: '' });
@@ -55,3 +53,4 @@ export default function CalendarioDisponibilidad() {
     </View>
   );
 }
+

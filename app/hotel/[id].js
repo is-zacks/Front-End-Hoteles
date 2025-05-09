@@ -5,14 +5,14 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-import { hoteles } from '../../data/hoteles';
 import RoomCard from '../../components/RoomCard';
 import BaseScreen from '../../components/BaseScreen';
-
+import useHotelById from '../../src/hooks/useHotelById';
 
 const { width } = Dimensions.get('window');
 
@@ -20,7 +20,7 @@ export default function HotelScreen() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
 
-  const hotel = hoteles.find((h) => h.id === Number(id));
+  const { hotel, loading, error } = useHotelById(id);
 
   useLayoutEffect(() => {
     if (hotel) {
@@ -35,6 +35,22 @@ export default function HotelScreen() {
     }
   }, [hotel]);
 
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#4a7054" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-red-500 text-base">Error: {error}</Text>
+      </View>
+    );
+  }
+
   if (!hotel) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -45,7 +61,7 @@ export default function HotelScreen() {
 
   return (
     <BaseScreen>
-      <ScrollView className="">
+      <ScrollView>
         {/* Carrusel de imágenes */}
         <ScrollView
           horizontal
@@ -53,14 +69,23 @@ export default function HotelScreen() {
           showsHorizontalScrollIndicator={false}
           className="w-full h-56"
         >
-          {hotel.imagenes.map((img, idx) => (
+          {hotel.images && hotel.images.length > 0 ? (
+            hotel.images.map((img, idx) => (
+              <Image
+                key={idx}
+                source={{ uri: img.image_url }}
+                style={{ width: width, height: 220 }}
+                resizeMode="cover"
+              />
+            ))
+          ) : (
             <Image
-              key={idx}
-              source={img}
+              source={require('../../assets/catedral.jpeg')}
+              className="w-full h-56"
               style={{ width: width, height: 220 }}
               resizeMode="cover"
             />
-          ))}
+          )}
         </ScrollView>
 
         {/* Información del hotel */}
@@ -85,9 +110,13 @@ export default function HotelScreen() {
         {/* Habitaciones */}
         <View className="px-4 mt-6 mb-12">
           <Text className="text-lg font-semibold text-gray-800 mb-3">Habitaciones</Text>
-          {hotel.rooms.map((room) => (
-            <RoomCard key={room.id} room={room} hotelId={hotel.id} />
-          ))}
+          {hotel.rooms && hotel.rooms.length > 0 ? (
+            hotel.rooms.map((room) => (
+              <RoomCard key={room.id} room={room} hotelId={hotel.id} />
+            ))
+          ) : (
+            <Text className="text-gray-500">Este hotel aún no tiene habitaciones registradas.</Text>
+          )}
         </View>
       </ScrollView>
     </BaseScreen>

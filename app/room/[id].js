@@ -11,27 +11,29 @@ import {
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
-import ReservaModal from '../../components/ReservaModal';
-import { hoteles } from '../../data/hoteles';
+import api from '../../src/api/client';
 
 const { width } = Dimensions.get('window');
 
 export default function RoomScreen() {
-  const { id, hotelId } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mostrarModal, setMostrarModal] = useState(false);
   const navigation = useNavigation();
   const router = useRouter();
 
   useEffect(() => {
-    const hotel = hoteles.find((h) => h.id === Number(hotelId));
-    const roomFound = hotel?.rooms.find((r) => r.id === Number(id));
-    if (roomFound) {
-      setRoom(roomFound);
-    }
-    setLoading(false);
-  }, [id, hotelId]);
+    if (!id) return;
+    api.get(`/habitaciones/${id}/`)
+      .then(res => {
+        setRoom(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error al cargar habitación:', err);
+        setLoading(false);
+      });
+  }, [id]);
 
   useEffect(() => {
     if (room) {
@@ -57,9 +59,11 @@ export default function RoomScreen() {
   return (
     <ScrollView style={styles.container}>
       <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
-        {room.imagenes ? room.imagenes.map((img, idx) => (
-          <Image key={idx} source={img} style={styles.image} />
-        )) : (
+        {room.images.length > 0 ? (
+          room.images.map((img, idx) => (
+            <Image key={idx} source={{ uri: img.image_url }} style={styles.image} />
+          ))
+        ) : (
           <Image source={require('../../assets/catedral.jpeg')} style={styles.image} />
         )}
       </ScrollView>
@@ -68,40 +72,40 @@ export default function RoomScreen() {
         <Text style={styles.title}>{room.title}</Text>
 
         <View style={styles.featuresRow}>
-          <Text style={styles.feature}><MaterialIcons name="square-foot" /> {room.size || 'Tamaño N/D'}</Text>
-          <Text style={styles.feature}><FontAwesome name="eye" /> {room.view || 'Vista N/D'}</Text>
-          <Text style={styles.feature}><MaterialIcons name="ac-unit" /> Aire</Text>
-          <Text style={styles.feature}><FontAwesome name="wifi" /> WiFi</Text>
+          <Text style={styles.feature}><MaterialIcons name="square-foot" /> {room.size || 'N/A'}</Text>
+          <Text style={styles.feature}><FontAwesome name="eye" /> {room.view || 'N/A'}</Text>
+          <Text style={styles.feature}><MaterialIcons name="bed" /> {room.beds || 'N/A'}</Text>
         </View>
 
-        <Text style={styles.section}><Text style={styles.sectionBold}>Capacidad:</Text> {room.capacity} personas</Text>
-        <Text style={styles.section}><Text style={styles.sectionBold}>Precio:</Text> ${room.price} por noche</Text>
+        <Text style={styles.section}><Text style={styles.sectionBold}>Precio:</Text> ${room.price_per_night} por noche</Text>
+        <Text style={styles.section}><Text style={styles.sectionBold}>Políticas:</Text> {room.policies || 'No especificadas'}</Text>
         <Text style={styles.section}>{room.description || 'Descripción no disponible.'}</Text>
 
         <Text style={styles.sectionTitle}>Servicios:</Text>
         {room.services.map((item, i) => (
-          <Text key={i} style={styles.listItem}>✓ {item}</Text>
+          <Text key={i} style={styles.listItem}>✓ {item.name}</Text>
+        ))}
+
+        <Text style={styles.sectionTitle}>Baño:</Text>
+        {room.bathroom.map((item, i) => (
+          <Text key={i} style={styles.listItem}>• {item.name}</Text>
         ))}
 
         <View style={styles.priceRow}>
-          <Text style={styles.price}>${room.price}</Text>
+          <Text style={styles.price}>${room.price_per_night}</Text>
           <Text style={styles.perNight}>/noche</Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => setMostrarModal(true)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push({
+            pathname: `/reserva/${room.hotel}/${room.id}/step1`,
+            params: { precio: room.price_per_night, nombre_habitacion: room.title },
+          })}
+        >
           <Text style={styles.buttonText}>Reservar ahora</Text>
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push({
-          pathname: `/reserva/${hotelId}/${room.id}/step1`,
-          params: { precio: room.price },
-        })}
-        >
-        <Text style={styles.buttonText}>Reservar ahora</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }

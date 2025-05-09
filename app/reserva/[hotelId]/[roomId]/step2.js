@@ -6,20 +6,21 @@ import BaseScreen from '../../../../components/BaseScreen';
 
 export default function Step2Contacto() {
   const router = useRouter();
-  const { hotelId, roomId, startDate, endDate, guests } = useLocalSearchParams();
+  const navigation = useNavigation();
+  const {
+    hotelId, roomId, startDate, endDate, guests, precio, nombre_habitacion
+  } = useLocalSearchParams();
+
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [telefono, setTelefono] = useState('');
-  const navigation = useNavigation();
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Datos de contacto',
       headerTitleAlign: 'center',
-      headerStyle: {
-        backgroundColor: '#fdfaf6', // Fondo claro y cálido
-      },
-      headerTintColor: '#111', // Íconos y texto del header
+      headerStyle: { backgroundColor: '#fdfaf6' },
+      headerTintColor: '#111',
       headerLeft: () => (
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 12 }}>
           <Ionicons name="arrow-back" size={24} color="#111" />
@@ -40,9 +41,11 @@ export default function Step2Contacto() {
         startDate,
         endDate,
         guests,
+        precio,
+        nombre_habitacion,
         nombre,
         email,
-        telefono,
+        telefono
       },
     });
   };
@@ -84,7 +87,6 @@ export default function Step2Contacto() {
           />
         </ScrollView>
 
-        {/* Botón fijo al fondo */}
         <View className="absolute bottom-0 left-0 right-0  p-4 border-t border-gray-200">
           <TouchableOpacity
             onPress={continuar}

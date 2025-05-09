@@ -3,11 +3,11 @@ import { useState, useLayoutEffect } from 'react';
 import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
-import BaseScreen from '../../../../components/BaseScreen'; 
+import BaseScreen from '../../../../components/BaseScreen';
 
 export default function Step1Reserva() {
   const router = useRouter();
-  const { hotelId, roomId, precio } = useLocalSearchParams();
+  const { hotelId, roomId, precio, nombre_habitacion } = useLocalSearchParams();
   const [rango, setRango] = useState({});
   const [huespedes, setHuespedes] = useState(1);
   const navigation = useNavigation();
@@ -15,12 +15,12 @@ export default function Step1Reserva() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'Datos de contacto',
+      title: 'Selecciona tus fechas',
       headerTitleAlign: 'center',
       headerStyle: {
-        backgroundColor: '#fdfaf6', // Fondo claro y cálido
+        backgroundColor: '#fdfaf6',
       },
-      headerTintColor: '#111', // Íconos y texto del header
+      headerTintColor: '#111',
       headerLeft: () => (
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 12 }}>
           <Ionicons name="arrow-back" size={24} color="#111" />
@@ -28,7 +28,6 @@ export default function Step1Reserva() {
       ),
     });
   }, []);
-  
 
   const seleccionarRango = (day) => {
     if (!rango.startDate || (rango.startDate && rango.endDate)) {
@@ -87,6 +86,8 @@ export default function Step1Reserva() {
           startDate: rango.startDate,
           endDate: rango.endDate,
           guests: huespedes,
+          precio,
+          nombre_habitacion,
         },
       });
     } else {
@@ -162,7 +163,7 @@ export default function Step1Reserva() {
           )}
         </ScrollView>
 
-        {/* Botón fijo abajo */}
+        {/* Botón fijo */}
         <View className="absolute bottom-0 left-0 right-0  p-4 border-t border-gray-200">
           <TouchableOpacity
             onPress={continuar}

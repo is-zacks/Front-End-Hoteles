@@ -7,7 +7,7 @@ export default function LoginForm({ onLogin }) {
 
   return (
     <View className="w-full px-6">
-      <Text className="text-xl font-bold mb-4 text-center">Iniciar sesión</Text>
+      <Text className="text-xl font-bold mb-4 text-center">Iniciar sesión HOla</Text>
 
       <TextInput
         placeholder="Correo electrónico"

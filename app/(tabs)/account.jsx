@@ -2,27 +2,31 @@ import React from 'react';
 import { ScrollView, View, Text, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import OpcionUsuario from '../../components/auth/OpcionUsuario';
-import BaseScreen from '../../components/BaseScreen'; // 👈 Importar el BaseScreen
+import BaseScreen from '../../components/BaseScreen';
+import { useAuth } from '../../src/context/AuthContext';
 
 export default function AccountScreen() {
   const router = useRouter();
+  const { user, logoutUser } = useAuth();
 
-  // Usuario simulado (cambia a null para probar)
-  const usuario = null; // null = no logueado
-
+  const generateAvatarUrl = (username) => {
+    return `https://randomuser.me/api/portraits/men/34.jpg`;
+  };
   return (
     <BaseScreen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {usuario ? (
+        {user ? (
           <>
             {/* Información de usuario */}
             <View className="items-center mt-12 mb-6">
               <Image
-                source={{ uri: usuario.foto }}
+                source={{
+                  uri: user.photo || generateAvatarUrl()
+                }}
                 className="w-32 h-32 rounded-full"
               />
-              <Text className="text-xl font-bold mt-4">{usuario.nombre}</Text>
-              <Text className="text-sm text-gray-500">{usuario.email}</Text>
+              <Text className="text-xl font-bold mt-4">{user.username || 'Usuario'}</Text>
+              <Text className="text-sm text-gray-500">{user.email || 'Sin correo'}</Text>
             </View>
 
             {/* Opciones generales */}
@@ -31,36 +35,47 @@ export default function AccountScreen() {
                 icon="person-outline"
                 title="Perfil"
                 subtitle="Editar tu información"
-                onPress={() => {}}
+                onPress={() => router.push('/profile')}
               />
               <OpcionUsuario
                 icon="shield-outline"
                 title="Seguridad"
                 subtitle="Autenticación de dos factores"
-                onPress={() => {}}
+                onPress={() => router.push('/security')}
               />
               <OpcionUsuario
                 icon="options-outline"
                 title="Preferencias"
                 subtitle="Modo oscuro y más"
-                onPress={() => {}}
+                onPress={() => router.push('/preferences')}
               />
               <OpcionUsuario
                 icon="book-outline"
                 title="Mis Reservas"
                 subtitle="Historial y próximas estancias"
-                onPress={() => {}}
+                onPress={() => router.push('/reservations')}
               />
               <OpcionUsuario
                 icon="settings-outline"
                 title="Configuración"
                 subtitle="Notificaciones y reembolsos"
-                onPress={() => {}}
+                onPress={() => router.push('/settings')}
               />
+
+              {/* Botón de Cerrar Sesión */}
+              <TouchableOpacity
+                onPress={() => {
+                  logoutUser();
+                  router.push('/login');
+                }}
+                className="bg-red-500 px-6 py-3 rounded-full mt-6 items-center"
+              >
+                <Text className="text-white font-semibold text-base">Cerrar sesión</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Opciones exclusivas para admin */}
-            {usuario.rol === 'admin' && (
+            {user.rol === 'administrador' && (
               <View className="mt-8 space-y-3">
                 <Text className="text-sm text-gray-500">Administración</Text>
                 <OpcionUsuario
@@ -95,14 +110,14 @@ export default function AccountScreen() {
 
               <TouchableOpacity
                 onPress={() => router.push('/login')}
-                className="bg-[#4a7054] px-6 py-6 rounded-full mb-4"
+                className="bg-[#4a7054] px-6 py-4 rounded-full mb-4"
               >
                 <Text className="text-white font-semibold text-base">Iniciar sesión</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => router.push('/registro')}
-                className="border border-[#4a7054] px-6 py-6 rounded-full"
+                className="border border-[#4a7054] px-6 py-4 rounded-full"
               >
                 <Text className="text-[#4a7054] font-semibold text-base">Crear cuenta</Text>
               </TouchableOpacity>

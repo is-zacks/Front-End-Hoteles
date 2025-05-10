@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import BaseScreen from '../components/BaseScreen';
+import { useAuth } from '../src/context/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { loginUser } = useAuth();  // Usar el contexto de autenticación
+
+  const handleLogin = async () => {
+    try {
+      await loginUser(username, password);
+      Alert.alert('Inicio de sesión exitoso');
+      router.push('/');  // Redirigir a la pantalla principal después de iniciar sesión
+    } catch (error) {
+      Alert.alert('Error en el login', error.message);
+    }
+  };
 
   return (
     <BaseScreen>
@@ -23,8 +35,8 @@ export default function LoginScreen() {
             placeholder="Correo electrónico"
             placeholderTextColor="#888"
             className="bg-white px-4 py-3 m-3 rounded-lg border border-gray-300"
-            value={email}
-            onChangeText={setEmail}
+            value={username}
+            onChangeText={setUsername}
           />
           <TextInput
             placeholder="Contraseña"
@@ -37,7 +49,7 @@ export default function LoginScreen() {
         </View>
 
         <TouchableOpacity
-          onPress={() => {/* lógica de login */}}
+          onPress={handleLogin}  // Integrar la función de login
           className="bg-[#4a7054] py-4 rounded-full items-center"
         >
           <Text className="text-white font-semibold text-lg">Entrar</Text>

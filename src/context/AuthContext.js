@@ -28,26 +28,64 @@ export const AuthProvider = ({ children }) => {
 
   // Función de Login
   const loginUser = async (username, password) => {
+  try {
+    const response = await api.post('/usuarios/login/', { username, password });
+    const { access, refresh } = response.data;
+
+    await AsyncStorage.setItem('accessToken', access);
+    await AsyncStorage.setItem('refreshToken', refresh);
+
+    setAccessToken(access);
+    await fetchUserProfile(access);
+    return { access, refresh };
+  } catch (error) {
+    console.error('Error en el login:', error.response?.data || error.message);
+    if (error.response?.status === 401) {
+      throw new Error('Usuario o contraseña incorrectos');
+    }
+    throw new Error('Error al iniciar sesión. Inténtalo de nuevo.');
+  }
+};
+
+
+  // Función de Registro
+  const registerUser = async (username, email, password) => {
     try {
-      const response = await api.post('/usuarios/login/', { username, password });
-      const { access, refresh } = response.data;
+      // Realizar la solicitud de registro al backend
+      const response = await api.post('/usuarios/registro/', { username, email, password });
+      console.log('Registro exitoso:', response.data);
 
-      // Guardar tokens en AsyncStorage
-      await AsyncStorage.setItem('accessToken', access);
-      await AsyncStorage.setItem('refreshToken', refresh);
+      // Después del registro, iniciar sesión automáticamente
+      await loginUser(username, password);
 
-      setAccessToken(access);
-      console.log('Tokens guardados:', { access, refresh });
-
-      // Obtener el perfil del usuario autenticado
-      await fetchUserProfile(access);
-
-      return { access, refresh };
+      return response.data;
     } catch (error) {
-      console.error('Error en el login:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.detail || 'Credenciales incorrectas');
+      console.error('Error en el registro:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.detail || 'Error al registrar el usuario');
     }
   };
+
+  // Función para actualizar el perfil del usuario
+  const updateUserProfile = async (username, email) => {
+  try {
+    const response = await api.patch('/usuarios/perfil/edit/', {
+      username,
+      email,
+    });
+
+    // Actualizar el estado del usuario en el contexto
+    setUser((prev) => ({
+      ...prev,
+      ...response.data,
+    }));
+    console.log('Perfil actualizado:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar el perfil:', error.message);
+    throw new Error('No se pudo actualizar el perfil');
+  }
+};
+
 
   // Cerrar Sesión
   const logoutUser = async () => {
@@ -59,7 +97,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ user, loginUser, registerUser, logoutUser, updateUserProfile, accessToken }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,6 +12,7 @@ export default function AccountScreen() {
   const generateAvatarUrl = (username) => {
     return `https://randomuser.me/api/portraits/men/34.jpg`;
   };
+
   return (
     <BaseScreen>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -30,12 +31,12 @@ export default function AccountScreen() {
             </View>
 
             {/* Opciones generales */}
-            <View className="space-y-3">
+            <View className="space-y-3 mb-6">
               <OpcionUsuario
                 icon="person-outline"
                 title="Perfil"
                 subtitle="Editar tu información"
-                onPress={() => router.push('/profile')}
+                onPress={() => router.push('/perfil/perfil')}
               />
               <OpcionUsuario
                 icon="shield-outline"
@@ -50,10 +51,16 @@ export default function AccountScreen() {
                 onPress={() => router.push('/preferences')}
               />
               <OpcionUsuario
-                icon="book-outline"
-                title="Mis Reservas"
-                subtitle="Historial y próximas estancias"
-                onPress={() => router.push('/reservations')}
+                icon="help-circle-outline"
+                title="Ayuda"
+                subtitle="Preguntas frecuentes"
+                onPress={() => router.push('/help')}
+              />
+              <OpcionUsuario
+                icon="chatbubble-ellipses-outline"
+                title="Soporte"
+                subtitle="Contáctanos"
+                onPress={() => router.push('/support')}
               />
               <OpcionUsuario
                 icon="settings-outline"
@@ -61,23 +68,12 @@ export default function AccountScreen() {
                 subtitle="Notificaciones y reembolsos"
                 onPress={() => router.push('/settings')}
               />
-
-              {/* Botón de Cerrar Sesión */}
-              <TouchableOpacity
-                onPress={() => {
-                  logoutUser();
-                  router.push('/login');
-                }}
-                className="bg-red-500 px-6 py-3 rounded-full mt-6 items-center"
-              >
-                <Text className="text-white font-semibold text-base">Cerrar sesión</Text>
-              </TouchableOpacity>
             </View>
 
             {/* Opciones exclusivas para admin */}
             {user.rol === 'administrador' && (
-              <View className="mt-8 space-y-3">
-                <Text className="text-sm text-gray-500">Administración</Text>
+              <View className="space-y-3 mb-6">
+                <Text className="text-sm text-gray-500">Opciones de Administración</Text>
                 <OpcionUsuario
                   icon="grid-outline"
                   title="Dashboard"
@@ -98,6 +94,19 @@ export default function AccountScreen() {
                 />
               </View>
             )}
+
+            {/* Botón de Cerrar Sesión */}
+            <View className="mt-4">
+              <TouchableOpacity
+                onPress={() => {
+                  logoutUser();
+                  router.push('/login');
+                }}
+                className="bg-red-500 px-6 py-3 rounded-full items-center"
+              >
+                <Text className="text-white font-semibold text-base">Cerrar sesión</Text>
+              </TouchableOpacity>
+            </View>
           </>
         ) : (
           <>

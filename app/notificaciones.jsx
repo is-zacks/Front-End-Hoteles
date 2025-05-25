@@ -1,6 +1,7 @@
-import { View, Text, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, Animated } from 'react-native';
+import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import BaseScreen from '../components/BaseScreen';
 
 const notificaciones = [
   {
@@ -30,28 +31,47 @@ const notificaciones = [
 ];
 
 export default function NotificacionesScreen() {
+  const [fadeAnim] = useState(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="px-4 pt-6">
-        <Text className="text-xl font-bold text-[#2c2c66] mb-4">Notificaciones</Text>
+    <BaseScreen>
+      
+        <ScrollView className="flex-1 px-4 pt-6">
+          <Text className="text-2xl font-extrabold text-[#2c2c66] mb-4">Notificaciones</Text>
 
-        {notificaciones.map((item) => (
-          <View
-            key={item.id}
-            className="bg-[#f9f9f9] rounded-xl px-4 py-4 mb-4 border border-gray-200 flex-row space-x-4"
-          >
-            <View className="bg-white p-3 rounded-full shadow" style={{ backgroundColor: item.color }}>
-              <Ionicons name={item.icono} size={20} color="white" />
-            </View>
+          {notificaciones.map((item) => (
+            <View
+              key={item.id}
+              className="bg-white rounded-xl px-4 py-4 mb-4 shadow-md flex-row items-center space-x-4"
+              style={{
+                borderColor: item.color,
+                borderWidth: 1,
+                elevation: 3,
+              }}
+            >
+              <View
+                className="p-3 rounded-full"
+                style={{ backgroundColor: item.color }}
+              >
+                <Ionicons name={item.icono} size={24} color="white" />
+              </View>
 
-            <View className="flex-1">
-              <Text className="font-semibold text-gray-800 mb-1">{item.titulo}</Text>
-              <Text className="text-sm text-gray-600">{item.mensaje}</Text>
-              <Text className="text-xs text-gray-400 mt-2">{item.fecha}</Text>
+              <View className="flex-1">
+                <Text className="text-lg font-bold text-gray-800">{item.titulo}</Text>
+                <Text className="text-base text-gray-600">{item.mensaje}</Text>
+                <Text className="text-sm text-gray-500 mt-1">{item.fecha}</Text>
+              </View>
             </View>
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+          ))}
+        </ScrollView>
+    </BaseScreen>
   );
 }

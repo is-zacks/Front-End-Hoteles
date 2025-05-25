@@ -21,10 +21,7 @@ export default function TabsLayout() {
           title: 'Reservas',
           tabBarIcon: ({ color }) => <MaterialIcons name="event" size={29} color={color} />,
         }} />
-        <Tabs.Screen name="rooms" options={{
-          title: 'Habitaciones',
-          tabBarIcon: ({ color }) => <Ionicons name="bed-outline" size={29} color={color} />,
-        }} />
+        
         <Tabs.Screen name="account" options={{
           title: 'Cuenta',
           tabBarIcon: ({ color }) => <FontAwesome5 name="user" size={25} color={color} />,

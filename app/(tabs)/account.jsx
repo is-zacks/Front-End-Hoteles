@@ -13,6 +13,57 @@ export default function AccountScreen() {
     return `https://randomuser.me/api/portraits/men/34.jpg`;
   };
 
+  // Opciones comunes para todos los roles
+  const opcionesComunes = [
+    { icon: 'person-outline', title: 'Perfil', subtitle: 'Editar tu información', ruta: '/perfil/perfil' },
+    // { icon: 'shield-outline', title: 'Seguridad', subtitle: 'Autenticación de dos factores', ruta: '/security' },
+    { icon: 'options-outline', title: 'Preferencias', subtitle: 'Modo oscuro y más', ruta: '/preferences' },
+    { icon: 'help-circle-outline', title: 'Ayuda', subtitle: 'Preguntas frecuentes', ruta: '/ayuda/dudas' },
+    { icon: 'chatbubble-ellipses-outline', title: 'Soporte', subtitle: 'Contáctanos', ruta: '/soporte' },
+    // { icon: 'settings-outline', title: 'Configuración', subtitle: 'Notificaciones y reembolsos', ruta: '/settings' },
+  ];
+
+  // Opciones exclusivas para el administrador
+  const opcionesAdmin = [
+    { icon: 'grid-outline', title: 'Dashboard', subtitle: 'Accede al panel de control', ruta: '/dashboard/admin' },
+    { icon: 'bed-outline', title: 'Gestión de Habitaciones', subtitle: 'Edita o elimina habitaciones', ruta: '/gestion/habitaciones' },
+    { icon: 'stats-chart-outline', title: 'Reportes', subtitle: 'Estadísticas y rendimiento', ruta: '/gestion/reportes' },
+    { icon: 'people-outline', title: 'Gestión de Usuarios', subtitle: 'Administrar usuarios del sistema', ruta: '/gestion/usuarios' },
+    { icon: 'clipboard-outline', title: 'Reservaciones', subtitle: 'Gestión de reservaciones', ruta: '/reservaciones' },
+    { icon: 'bed-outline', title: 'Estado de Habitaciones', subtitle: 'Actualizar estado de limpieza', ruta: '/gestion/habitaciones/camaristas' },
+    { icon: 'construct-outline', title: 'Reparacion de Habitaciones', subtitle: 'Actualizar estado de mantenimiento', ruta: '/gestion/habitaciones/mantenimiento' },
+  ];
+
+  // Opciones específicas para roles secundarios (camarista, recepcionista, mantenimiento)
+  const opcionesRolesSecundarios = {
+    camarista: [
+      { icon: 'cleaning-services', title: 'Estado de Habitaciones', subtitle: 'Actualizar estado de limpieza', ruta: '/gestion/habitaciones' },
+      { icon: 'checkmark-done-outline', title: 'Tareas Asignadas', subtitle: 'Listado de tareas de limpieza', ruta: '/gestion/tareas' },
+    ],
+    recepcionista: [
+      { icon: 'calendar-check', title: 'Ver Reservaciones', subtitle: 'Listado de reservaciones', ruta: '/reservaciones' },
+      { icon: 'edit', title: 'Modificar Reservación', subtitle: 'Cambiar fechas o estado', ruta: '/reservaciones/modificar' },
+    ],
+    mantenimiento: [
+      { icon: 'hammer-outline', title: 'Reparaciones', subtitle: 'Actualizar estado de mantenimiento', ruta: '/gestion/reparaciones' },
+      { icon: 'alert-circle-outline', title: 'Reportar Falla', subtitle: 'Registrar una falla en la habitación', ruta: '/gestion/fallas' },
+    ],
+  };
+
+  const renderOpciones = (opciones) => (
+    <View className="space-y-3 mb-6">
+      {opciones.map((opcion, index) => (
+        <OpcionUsuario
+          key={index}
+          icon={opcion.icon}
+          title={opcion.title}
+          subtitle={opcion.subtitle}
+          onPress={() => router.push(opcion.ruta)}
+        />
+      ))}
+    </View>
+  );
+
   return (
     <BaseScreen>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -21,78 +72,30 @@ export default function AccountScreen() {
             {/* Información de usuario */}
             <View className="items-center mt-12 mb-6">
               <Image
-                source={{
-                  uri: user.photo || generateAvatarUrl()
-                }}
+                source={{ uri: user.photo || generateAvatarUrl() }}
                 className="w-32 h-32 rounded-full"
               />
               <Text className="text-xl font-bold mt-4">{user.username || 'Usuario'}</Text>
               <Text className="text-sm text-gray-500">{user.email || 'Sin correo'}</Text>
+              <Text className="text-sm text-gray-400">{`Rol: ${user.rol}`}</Text>
             </View>
 
-            {/* Opciones generales */}
-            <View className="space-y-3 mb-6">
-              <OpcionUsuario
-                icon="person-outline"
-                title="Perfil"
-                subtitle="Editar tu información"
-                onPress={() => router.push('/perfil/perfil')}
-              />
-              <OpcionUsuario
-                icon="shield-outline"
-                title="Seguridad"
-                subtitle="Autenticación de dos factores"
-                onPress={() => router.push('/security')}
-              />
-              <OpcionUsuario
-                icon="options-outline"
-                title="Preferencias"
-                subtitle="Modo oscuro y más"
-                onPress={() => router.push('/preferences')}
-              />
-              <OpcionUsuario
-                icon="help-circle-outline"
-                title="Ayuda"
-                subtitle="Preguntas frecuentes"
-                onPress={() => router.push('/help')}
-              />
-              <OpcionUsuario
-                icon="chatbubble-ellipses-outline"
-                title="Soporte"
-                subtitle="Contáctanos"
-                onPress={() => router.push('/support')}
-              />
-              <OpcionUsuario
-                icon="settings-outline"
-                title="Configuración"
-                subtitle="Notificaciones y reembolsos"
-                onPress={() => router.push('/settings')}
-              />
-            </View>
+            {/* Opciones comunes */}
+            {renderOpciones(opcionesComunes)}
 
-            {/* Opciones exclusivas para admin */}
+            {/* Opciones según el rol */}
             {user.rol === 'administrador' && (
-              <View className="space-y-3 mb-6">
-                <Text className="text-sm text-gray-500">Opciones de Administración</Text>
-                <OpcionUsuario
-                  icon="grid-outline"
-                  title="Dashboard"
-                  subtitle="Accede al panel de control"
-                  onPress={() => router.push('/dashboard/admin')}
-                />
-                <OpcionUsuario
-                  icon="bed-outline"
-                  title="Gestión de habitaciones"
-                  subtitle="Edita o elimina habitaciones"
-                  onPress={() => router.push('/admin/rooms')}
-                />
-                <OpcionUsuario
-                  icon="stats-chart-outline"
-                  title="Reportes"
-                  subtitle="Estadísticas y rendimiento"
-                  onPress={() => router.push('/admin/reportes')}
-                />
-              </View>
+              <>
+                <Text className="text-sm text-gray-500">Opciones Administrativas</Text>
+                {renderOpciones(opcionesAdmin)}
+              </>
+            )}
+
+            {user.rol in opcionesRolesSecundarios && (
+              <>
+                <Text className="text-sm text-gray-500">Opciones de {user.rol.charAt(0).toUpperCase() + user.rol.slice(1)}</Text>
+                {renderOpciones(opcionesRolesSecundarios[user.rol])}
+              </>
             )}
 
             {/* Botón de Cerrar Sesión */}

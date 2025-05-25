@@ -15,7 +15,7 @@ export default function ProfileScreen() {
 
   useLayoutEffect(() => {
       navigation.setOptions({
-        title: 'Selecciona tus fechas',
+        title: 'Editar Perfil',
         headerTitleAlign: 'center',
         headerStyle: {
           backgroundColor: '#fdfaf6',

@@ -30,19 +30,19 @@ export default function BookingScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 px-4 pt-6">
+    <ScrollView className="flex-1 px-4 pt-6 bg-[#fdfaf6]">
       <View className="mb-4">
-        <Text className="text-xl font-bold text-gray-800">Consultar Reservación</Text>
+        <Text className="text-2xl font-bold text-gray-800 mb-2">Consultar Reservación</Text>
         <TextInput
-          className="bg-gray-100 p-3 rounded-lg mt-2"
+          className="bg-white p-4 rounded-xl shadow-md mt-2 border border-gray-200"
           placeholder="Ingresa el folio"
           value={folio}
           onChangeText={setFolio}
         />
-        {error ? <Text className="text-red-500 mt-1">{error}</Text> : null}
+        {error ? <Text className="text-red-600 mt-1">{error}</Text> : null}
         <TouchableOpacity
           onPress={consultarReserva}
-          className="bg-[#4a7054] py-3 rounded-full mt-3 items-center"
+          className="bg-[#4a7054] py-3 rounded-xl shadow-md mt-3 items-center"
         >
           <Text className="text-white font-bold">Consultar</Text>
         </TouchableOpacity>
@@ -56,12 +56,11 @@ export default function BookingScreen() {
       )}
 
       {reserva && (
-        <View className="bg-white rounded-2xl shadow-md p-4 mb-4">
-          {/* Encabezado con el nombre del hotel */}
+        <View className="bg-white rounded-xl shadow-md p-4 mb-4">
           <View className="flex-row items-center mb-4">
             <Image
               source={require('../../assets/catedral.jpeg')}
-              className="w-20 h-20 rounded-lg mr-4"
+              className="w-24 h-24 rounded-xl mr-4"
               resizeMode="cover"
             />
             <View>
@@ -70,49 +69,19 @@ export default function BookingScreen() {
             </View>
           </View>
 
-          {/* Información del cliente */}
-          <View className="mt-4 bg-gray-100 p-3 rounded-lg">
+          <View className="mt-4 bg-gray-100 p-3 rounded-xl">
             <Text className="text-lg font-semibold text-gray-700">Datos del Cliente</Text>
             <View className="flex-row items-center mt-1">
-              <Ionicons name="person" size={16} color="#4a7054" />
+              <Ionicons name="person" size={18} color="#4a7054" />
               <Text className="ml-2">Nombre: {reserva.nombre_cliente}</Text>
             </View>
             <View className="flex-row items-center mt-1">
-              <Ionicons name="mail" size={16} color="#4a7054" />
+              <Ionicons name="mail" size={18} color="#4a7054" />
               <Text className="ml-2">Correo: {reserva.email_cliente}</Text>
             </View>
             <View className="flex-row items-center mt-1">
-              <Ionicons name="call" size={16} color="#4a7054" />
-              <Text className="ml-2">Telefono: {reserva.telefono_cliente || 'No registrado'}</Text>
-            </View>
-          </View>
-
-          {/* Detalles de la reservación */}
-          <View className="mt-4 bg-gray-100 p-3 rounded-lg">
-            <Text className="text-lg font-semibold text-gray-700">Detalles de la Reservación</Text>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="calendar" size={16} color="#4a7054" />
-              <Text className="ml-2">Fechas: {reserva.fecha_inicio} - {reserva.fecha_fin}</Text>
-            </View>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="people" size={16} color="#4a7054" />
-              <Text className="ml-2">Huéspedes: {reserva.numero_huespedes}</Text>
-            </View>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="bed" size={16} color="#4a7054" />
-              <Text className="ml-2">Habitación #{reserva.habitacion}</Text>
-            </View>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="cash" size={16} color="#4a7054" />
-              <Text className="ml-2">Total: ${reserva.total}</Text>
-            </View>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="clipboard" size={16} color="#4a7054" />
-              <Text className="ml-2">Estado: {reserva.estado}</Text>
-            </View>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="time" size={16} color="#4a7054" />
-              <Text className="ml-2">Creación: {new Date(reserva.fecha_creacion).toLocaleString()}</Text>
+              <Ionicons name="call" size={18} color="#4a7054" />
+              <Text className="ml-2">Teléfono: {reserva.telefono_cliente || 'No registrado'}</Text>
             </View>
           </View>
         </View>

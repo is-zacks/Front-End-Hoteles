@@ -9,8 +9,8 @@ export default function HeaderSuperior() {
   const router = useRouter();
   const { user } = useAuth();  // ✅ Obtener el usuario desde el contexto
 
-  // Generar URL de avatar usando la misma lógica que en el perfil
-  const generateAvatarUrl = (username) => {
+  // Generar URL de avatar de usuario ficticio
+  const generateAvatarUrl = () => {
     return `https://randomuser.me/api/portraits/men/34.jpg`;
   };
 
@@ -26,14 +26,18 @@ export default function HeaderSuperior() {
         <Text className="text-xl font-bold text-[#2c2c66]">Hoteles de Morelia</Text>
       </View>
 
-      {/* Avatar del usuario */}
-      <TouchableOpacity onPress={() => router.push('/account')}>
-        <Image
-          source={{
-            uri: user?.photo || generateAvatarUrl()
-          }}
-          className="w-9 h-9 rounded-full"
-        />
+      {/* Avatar o icono de usuario */}
+      <TouchableOpacity onPress={() => router.push(user ? '/account' : '/login')}>
+        {user ? (
+          <Image
+            source={{ uri: user.photo || generateAvatarUrl() }}
+            className="w-9 h-9 rounded-full"
+          />
+        ) : (
+          <View className="w-9 h-9 bg-gray-300 rounded-full items-center justify-center">
+            <Ionicons name="person-circle-outline" size={30} color="#4a7054" />
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );

@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   TouchableOpacity,
   Modal,
   Pressable,
 } from 'react-native';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import BaseScreen from './BaseScreen';
 
 const mockHabitaciones = Array.from({ length: 12 }, (_, i) => ({
   id: i + 1,
@@ -17,10 +20,24 @@ const mockHabitaciones = Array.from({ length: 12 }, (_, i) => ({
   estado_mantenimiento: 'listo',
 }));
 
-const DashboardHabitaciones = ({ rol = 'camarista' }) => {
+export default function DashboardHabitaciones({ rol = 'camarista' }) {
   const [habitaciones, setHabitaciones] = useState([]);
   const [habitacionActiva, setHabitacionActiva] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+
+  // Configuración del encabezado dinámico
+  useLayoutEffect(() => {
+    const titulo = rol === 'camarista' ? 'Dashboard de Camaristas' : 'Dashboard de Mantenimiento';
+    navigation.setOptions({
+      title: titulo,
+      headerTitleAlign: 'center',
+      headerStyle: {
+        backgroundColor: '#fdfaf6',
+      },
+      headerTintColor: '#111',
+    });
+  }, [navigation, rol]);
 
   useEffect(() => {
     setHabitaciones(mockHabitaciones);
@@ -47,29 +64,28 @@ const DashboardHabitaciones = ({ rol = 'camarista' }) => {
   };
 
   const renderItem = ({ item }) => {
-    const disabled = !esEditable(item);
     const enUso =
       item.estado_limpieza === 'en limpieza' ||
       item.estado_mantenimiento === 'en mantenimiento';
-    const fondo = enUso ? '#ccc' : '#fff';
+    const fondo = enUso ? 'bg-gray-300' : 'bg-white';
 
     return (
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: fondo }]}
-        disabled={disabled}
+        className={`flex-1 min-h-[100px] border border-gray-300 rounded-lg justify-center items-center m-1 p-2 ${fondo}`}
+        disabled={!esEditable(item)}
         onPress={() => {
           setHabitacionActiva(item);
           setModalVisible(true);
         }}
       >
-        <Text style={styles.cardText}>{item.nombre}</Text>
-        <View style={styles.estadoRow}>
-          <MaterialIcons name="cleaning-services" size={14} color="#555" />
-          <Text style={styles.estadoLabel}> {item.estado_limpieza}</Text>
+        <Text className="text-lg font-bold">{item.nombre}</Text>
+        <View className="flex-row items-center gap-1 mt-2">
+          <MaterialIcons name="cleaning-services" size={18} color="#555" />
+          <Text className="text-sm text-gray-600"> {item.estado_limpieza}</Text>
         </View>
-        <View style={styles.estadoRow}>
-          <FontAwesome5 name="tools" size={14} color="#555" />
-          <Text style={styles.estadoLabel}> {item.estado_mantenimiento}</Text>
+        <View className="flex-row items-center gap-1">
+          <FontAwesome5 name="tools" size={18} color="#555" />
+          <Text className="text-sm text-gray-600"> {item.estado_mantenimiento}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -87,113 +103,47 @@ const DashboardHabitaciones = ({ rol = 'camarista' }) => {
         ];
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard de {rol === 'camarista' ? 'Camaristas' : 'Mantenimiento'}</Text>
-      <FlatList
-        data={habitaciones}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={3}
-        renderItem={renderItem}
-        columnWrapperStyle={styles.row}
-      />
+    <BaseScreen>
+      <View className="flex-1 p-4">
+        <Text className="text-3xl font-bold text-[#2c2c66] mb-4">
+          Dashboard de {rol === 'camarista' ? 'Camaristas' : 'Mantenimiento'}
+        </Text>
+        <FlatList
+          data={habitaciones}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={3}
+          renderItem={renderItem}
+        />
 
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Cambiar estado</Text>
-            {opciones.map((op) => (
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black bg-opacity-40">
+            <View className="bg-white p-5 rounded-lg w-64">
+              <Text className="text-xl font-bold mb-4">Cambiar Estado</Text>
+              {opciones.map((op) => (
+                <Pressable
+                  key={op.estado}
+                  className="py-3 px-4 bg-gray-100 rounded-md my-1 flex-row items-center"
+                  onPress={() => handleEstado(habitacionActiva.id, op.estado)}
+                >
+                  <Ionicons name={op.icon} size={20} color="#555" />
+                  <Text className="ml-2 text-lg">{op.label}</Text>
+                </Pressable>
+              ))}
               <Pressable
-                key={op.estado}
-                style={styles.modalBtn}
-                onPress={() => handleEstado(habitacionActiva.id, op.estado)}
+                className="mt-4 py-2 bg-red-600 rounded-full items-center"
+                onPress={() => setModalVisible(false)}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  {rol === 'camarista' ? (
-                    <MaterialIcons name={op.icon} size={16} color="#333" />
-                  ) : (
-                    <FontAwesome5 name={op.icon} size={16} color="#333" />
-                  )}
-                  <Text>{op.label}</Text>
-                </View>
+                <Text className="text-white">Cancelar</Text>
               </Pressable>
-            ))}
-            <Pressable onPress={() => setModalVisible(false)}>
-              <Text style={{ marginTop: 10, color: 'red' }}>Cancelar</Text>
-            </Pressable>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </BaseScreen>
   );
-};
-
-export default DashboardHabitaciones;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  row: {
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  card: {
-    flex: 1,
-    minHeight: 100,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 4,
-    padding: 8,
-  },
-  cardText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  estadoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  estadoLabel: {
-    fontSize: 12,
-    color: '#555',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    width: 220,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  modalBtn: {
-    paddingVertical: 8,
-    width: '100%',
-    alignItems: 'center',
-  },
-});
+}

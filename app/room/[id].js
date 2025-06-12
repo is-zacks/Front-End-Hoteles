@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
-import ReservaModal from '../../components/ReservaModal';
+import { FontAwesome, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import api from '../../src/api/client';
 
 const { width } = Dimensions.get('window');
 
@@ -19,44 +19,34 @@ export default function RoomScreen() {
   const { id } = useLocalSearchParams();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mostrarModal, setMostrarModal] = useState(false);
+  const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
-    setTimeout(() => {
-      setRoom({
-        id,
-        title: 'Habitación Doble Estándar',
-        size: '35 m²',
-        beds: '2 camas dobles',
-        description:
-          'Esta habitación cuenta con aire acondicionado y TV por cable. El baño privado incluye artículos de aseo gratuitos y, bajo petición, secador de pelo.',
-        bathroom: ['Artículos de aseo gratis', 'Ducha', 'WC', 'Toallas', 'Papel higiénico'],
-        view: 'Vistas',
-        services: [
-          'Aire acondicionado',
-          'Ropa de cama',
-          'Enchufe cerca de la cama',
-          'Escritorio',
-          'TV',
-          'Mosquitera',
-          'Canales vía satélite',
-          'TV de pantalla plana',
-          'Ventilador',
-          'Servicio de despertador',
-          'Armario',
-          'Toda la unidad en planta baja',
-        ],
-        policies: 'No se puede fumar',
-        price: 999,
-        images: [
-          require('../../assets/catedral.jpeg'),
-          require('../../assets/catedral.jpeg'),
-          require('../../assets/catedral.jpeg'),
-        ],
+    if (!id) return;
+    api.get(`/habitaciones/${id}/`)
+      .then(res => {
+        setRoom(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error al cargar habitación:', err);
+        setLoading(false);
       });
-      setLoading(false);
-    }, 1000);
   }, [id]);
+
+  useEffect(() => {
+    if (room) {
+      navigation.setOptions({
+        title: room.title,
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 8 }}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [room]);
 
   if (loading || !room) {
     return (
@@ -69,48 +59,53 @@ export default function RoomScreen() {
   return (
     <ScrollView style={styles.container}>
       <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
-        {room.images.map((img, idx) => (
-          <Image key={idx} source={img} style={styles.image} />
-        ))}
+        {room.images.length > 0 ? (
+          room.images.map((img, idx) => (
+            <Image key={idx} source={{ uri: img.image_url }} style={styles.image} />
+          ))
+        ) : (
+          <Image source={require('../../assets/catedral.jpeg')} style={styles.image} />
+        )}
       </ScrollView>
 
       <View style={styles.content}>
         <Text style={styles.title}>{room.title}</Text>
+
         <View style={styles.featuresRow}>
-          <Text style={styles.feature}><MaterialIcons name="square-foot" /> {room.size}</Text>
-          <Text style={styles.feature}><FontAwesome name="eye" /> {room.view}</Text>
-          <Text style={styles.feature}><MaterialIcons name="ac-unit" /> Aire</Text>
-          <Text style={styles.feature}><FontAwesome name="wifi" /> WiFi</Text>
+          <Text style={styles.feature}><MaterialIcons name="square-foot" /> {room.size || 'N/A'}</Text>
+          <Text style={styles.feature}><FontAwesome name="eye" /> {room.view || 'N/A'}</Text>
+          <Text style={styles.feature}><MaterialIcons name="bed" /> {room.beds || 'N/A'}</Text>
         </View>
 
-        <Text style={styles.section}><Text style={styles.sectionBold}>Tamaño:</Text> {room.size}</Text>
-        <Text style={styles.section}><Text style={styles.sectionBold}>Camas:</Text> {room.beds}</Text>
-        <Text style={styles.section}>{room.description}</Text>
-
-        <Text style={styles.sectionTitle}>En el baño privado:</Text>
-        {room.bathroom.map((item, i) => <Text key={i} style={styles.listItem}>✓ {item}</Text>)}
+        <Text style={styles.section}><Text style={styles.sectionBold}>Precio:</Text> ${room.price_per_night} por noche</Text>
+        <Text style={styles.section}><Text style={styles.sectionBold}>Políticas:</Text> {room.policies || 'No especificadas'}</Text>
+        <Text style={styles.section}>{room.description || 'Descripción no disponible.'}</Text>
 
         <Text style={styles.sectionTitle}>Servicios:</Text>
-        {room.services.map((item, i) => <Text key={i} style={styles.listItem}>✓ {item}</Text>)}
+        {room.services.map((item, i) => (
+          <Text key={i} style={styles.listItem}>✓ {item.name}</Text>
+        ))}
 
-        <Text style={styles.sectionTitle}>Política de humo:</Text>
-        <Text style={styles.listItem}>{room.policies}</Text>
+        <Text style={styles.sectionTitle}>Baño:</Text>
+        {room.bathroom.map((item, i) => (
+          <Text key={i} style={styles.listItem}>• {item.name}</Text>
+        ))}
 
         <View style={styles.priceRow}>
-          <Text style={styles.price}>${room.price}</Text>
+          <Text style={styles.price}>${room.price_per_night}</Text>
           <Text style={styles.perNight}>/noche</Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => setMostrarModal(true)}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push({
+            pathname: `/reserva/${room.hotel}/${room.id}/step1`,
+            params: { precio: room.price_per_night, nombre_habitacion: room.title },
+          })}
+        >
           <Text style={styles.buttonText}>Reservar ahora</Text>
         </TouchableOpacity>
       </View>
-
-      <ReservaModal
-        visible={mostrarModal}
-        onClose={() => setMostrarModal(false)}
-        habitacionId={room.id}
-      />
     </ScrollView>
   );
 }

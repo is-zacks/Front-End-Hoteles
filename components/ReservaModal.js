@@ -1,270 +1,84 @@
-import {
-    View,
-    Text,
-    TextInput,
-    StyleSheet,
-    Alert,
-    TouchableOpacity,
-    Modal,
-    ScrollView,
-    Image,
-    Dimensions,
-  } from 'react-native';
-  import DateTimePicker from '@react-native-community/datetimepicker';
-  import { useState, useEffect } from 'react';
-  import { FontAwesome5 } from '@expo/vector-icons';
-  
-  const { width } = Dimensions.get('window');
-  
-  export default function ReservaModal({ visible, onClose, habitacionId }) {
-    const [nombre, setNombre] = useState('');
-    const [email, setEmail] = useState('');
-    const [fechaInicio, setFechaInicio] = useState(new Date());
-    const [fechaFin, setFechaFin] = useState(new Date());
-    const [mostrarPickerInicio, setMostrarPickerInicio] = useState(false);
-    const [mostrarPickerFin, setMostrarPickerFin] = useState(false);
-    const [habitacion, setHabitacion] = useState(null);
-    const [servicios, setServicios] = useState([]);
-    const [seleccionados, setSeleccionados] = useState([]);
-  
-    useEffect(() => {
-      setHabitacion({
-        hotel: 'Hotel Catedral',
-        title: 'Habitación Doble Estándar',
-        precio: 999,
-        images: [
-          require('../assets/catedral.jpeg'),
-          require('../assets/catedral.jpeg'),
-          require('../assets/catedral.jpeg'),
-        ],
-      });
-  
-      setServicios([
-        { id: 1, nombre: 'Desayuno', icon: 'utensils', precio: 150 },
-        { id: 2, nombre: 'Traslado aeropuerto', icon: 'shuttle-van', precio: 300 },
-        { id: 3, nombre: 'Acceso spa', icon: 'spa', precio: 200 },
-      ]);
-    }, [habitacionId]);
-  
-    const toggleServicio = (id) => {
-      if (seleccionados.includes(id)) {
-        setSeleccionados(seleccionados.filter((s) => s !== id));
-      } else {
-        setSeleccionados([...seleccionados, id]);
-      }
-    };
-  
-    const calcularTotal = () => {
-      const extras = servicios
-        .filter((s) => seleccionados.includes(s.id))
-        .reduce((sum, s) => sum + s.precio, 0);
-      return habitacion ? habitacion.precio + extras : 0;
-    };
-  
-    const handleReserva = async () => {
-      if (!nombre || !email) {
-        Alert.alert('Error', 'Todos los campos son obligatorios');
-        return;
-      }
-  
-      if (fechaFin <= fechaInicio) {
-        Alert.alert('Error', 'La fecha de fin debe ser posterior a la de inicio');
-        return;
-      }
-  
-      const datos = {
-        nombre_cliente: nombre,
-        email_cliente: email,
-        fecha_inicio: fechaInicio.toISOString().split('T')[0],
-        fecha_fin: fechaFin.toISOString().split('T')[0],
-        habitacion: parseInt(habitacionId),
-        servicios_adicionales: seleccionados,
-      };
-  
-      try {
-        const res = await fetch('https://tu-api.com/api/reservas/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        });
-  
-        if (res.ok) {
-          const nuevaReserva = await res.json();
-          Alert.alert('¡Reserva Exitosa!', `Tu folio es: ${nuevaReserva.folio}`);
-          onClose();
-        } else {
-          Alert.alert('Error', 'No se pudo completar la reserva');
-        }
-      } catch (error) {
-        Alert.alert('Error', 'Fallo la conexión con el servidor');
-      }
-    };
-  
-    return (
-      <Modal
-        visible={visible}
-        animationType="slide"
-        onRequestClose={onClose}
-      >
-        <ScrollView contentContainerStyle={styles.container}>
-          {habitacion && (
-            <>
-              <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
-                {habitacion.images.map((img, idx) => (
-                  <Image key={idx} source={img} style={styles.image} />
-                ))}
-              </ScrollView>
-              <Text style={styles.hotel}>{habitacion.hotel}</Text>
-              <Text style={styles.room}>{habitacion.title}</Text>
-            </>
-          )}
-  
-          <TextInput
-            style={styles.input}
-            placeholder="Nombre completo"
-            value={nombre}
-            onChangeText={setNombre}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Correo electrónico"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
-  
-          <TouchableOpacity onPress={() => setMostrarPickerInicio(true)} style={styles.dateButton}>
-            <Text>Fecha de inicio: {fechaInicio.toLocaleDateString()}</Text>
-          </TouchableOpacity>
-          {mostrarPickerInicio && (
-            <DateTimePicker
-              value={fechaInicio}
-              mode="date"
-              display="default"
-              onChange={(e, date) => {
-                setMostrarPickerInicio(false);
-                if (date) setFechaInicio(date);
-              }}
-            />
-          )}
-  
-          <TouchableOpacity onPress={() => setMostrarPickerFin(true)} style={styles.dateButton}>
-            <Text>Fecha de fin: {fechaFin.toLocaleDateString()}</Text>
-          </TouchableOpacity>
-          {mostrarPickerFin && (
-            <DateTimePicker
-              value={fechaFin}
-              mode="date"
-              display="default"
-              onChange={(e, date) => {
-                setMostrarPickerFin(false);
-                if (date) setFechaFin(date);
-              }}
-            />
-          )}
-  
-          <Text style={styles.sectionTitle}>Servicios adicionales</Text>
-          {servicios.map((s) => (
-            <TouchableOpacity
-              key={s.id}
-              style={[styles.servicioItem, seleccionados.includes(s.id) && styles.servicioActivo]}
-              onPress={() => toggleServicio(s.id)}
-            >
-              <FontAwesome5 name={s.icon} size={16} color="#555" style={{ marginRight: 8 }} />
-              <Text style={{ flex: 1 }}>{s.nombre}</Text>
-              <Text>${s.precio}</Text>
-            </TouchableOpacity>
-          ))}
-  
-          <Text style={styles.total}>Total: ${calcularTotal()}</Text>
-  
-          <TouchableOpacity style={styles.button} onPress={handleReserva}>
-            <Text style={styles.buttonText}>Confirmar Reserva</Text>
-          </TouchableOpacity>
-  
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={styles.cancelText}>Cancelar</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </Modal>
-    );
-  }
-  
-  const styles = StyleSheet.create({
-    container: {
-      padding: 20,
-      paddingTop: 40,
-      backgroundColor: '#fff',
-      flexGrow: 1,
-    },
-    image: {
-      width: width,
-      height: 220,
-      resizeMode: 'cover',
-      marginBottom: 12,
-    },
-    hotel: {
-      fontSize: 16,
-      color: '#666',
-      textAlign: 'center',
-    },
-    room: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      textAlign: 'center',
-      marginBottom: 16,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 8,
-      padding: 12,
-      marginBottom: 12,
-    },
-    dateButton: {
-      padding: 12,
-      backgroundColor: '#eee',
-      borderRadius: 8,
-      marginBottom: 12,
-    },
-    sectionTitle: {
-      fontWeight: 'bold',
-      marginVertical: 8,
-      fontSize: 16,
-    },
-    servicioItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 8,
-      borderBottomWidth: 1,
-      borderColor: '#eee',
-    },
-    servicioActivo: {
-      backgroundColor: '#f0f8ff',
-    },
-    total: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      textAlign: 'right',
-      marginTop: 12,
-    },
-    button: {
-      backgroundColor: '#409eff',
-      padding: 14,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginTop: 20,
-    },
-    buttonText: {
-      color: '#fff',
-      fontWeight: 'bold',
-    },
-    cancelButton: {
-      padding: 12,
-      marginTop: 10,
-      alignItems: 'center',
-    },
-    cancelText: {
-      color: '#888',
-    },
+import { View, Text, Modal, TouchableOpacity, TextInput, Button, ScrollView } from 'react-native';
+import { useState } from 'react';
+import CalendarioDisponibilidad from './CalendarioDisponibilidad';
+
+export default function ReservaModal({ visible, onClose, habitacionId, precioPorNoche = 999 }) {
+  const [nombre, setNombre] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [rango, setRango] = useState({
+    startDate: '',
+    endDate: '',
+    markedDates: {},
   });
+
+  const calcularTotal = () => {
+    const { startDate, endDate } = rango;
+    if (startDate && endDate) {
+      const dias = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+      return dias > 0 ? dias * precioPorNoche : 0;
+    }
+    return 0;
+  };
+
+  const enviarReservacion = async () => {
+    if (!rango.startDate || !rango.endDate || !nombre || !correo) {
+      alert('Completa todos los campos y selecciona fechas');
+      return;
+    }
+
+    const payload = {
+      habitacion: habitacionId,
+      nombre,
+      correo,
+      fecha_inicio: rango.startDate,
+      fecha_fin: rango.endDate,
+      total: calcularTotal(),
+    };
+
+    try {
+      const response = await fetch('https://TU_BACKEND/api/reservaciones/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        alert('¡Reservación enviada!');
+        onClose();
+      } else {
+        alert('Error al reservar');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error de red');
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <ScrollView className="flex-1 bg-black/30">
+        <View className="bg-white m-4 p-6 rounded-xl">
+          <Text className="text-lg font-bold mb-4">Reservar habitación</Text>
+
+          <Text className="mb-1">Nombre completo</Text>
+          <TextInput value={nombre} onChangeText={setNombre} className="border p-2 mb-2 rounded" />
+
+          <Text className="mb-1">Correo electrónico</Text>
+          <TextInput value={correo} onChangeText={setCorreo} className="border p-2 mb-4 rounded" keyboardType="email-address" />
+
+          <CalendarioDisponibilidad rango={rango} setRango={setRango} />
+
+          <Text className="mt-4 mb-4 font-bold text-lg">Total: ${calcularTotal()}</Text>
+
+          <Button title="Confirmar Reservación" onPress={enviarReservacion} />
+
+          <TouchableOpacity onPress={onClose} className="mt-4">
+            <Text className="text-center text-red-600">Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </Modal>
+  );
+}

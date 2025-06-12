@@ -1,164 +1,124 @@
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    Image,
-    TouchableOpacity,
-    Dimensions,
-  } from 'react-native';
-  import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
-  import { useRouter, useLocalSearchParams } from 'expo-router';
-  import RoomCard from '../../components/RoomCard';
-  
-  const { width } = Dimensions.get('window');
-  
-  export default function HotelScreen() {
-    const router = useRouter();
-    const { id } = useLocalSearchParams();
-  
-    const hotel = {
-      name: 'Hotel Catedral',
-      location: 'Morelia Centro',
-      phone: '+52 4443876521',
-    };
-  
-    const rooms = [
-      {
-        id: 1,
-        title: 'Habitacion VIP',
-        capacity: 8,
-        price: 999,
-        features: ['Ba\u00f1o', 'WiFi', 'Aire Acond', '2x Individual', 'Limpieza'],
-      },
-      {
-        id: 2,
-        title: 'Habitacion VIP',
-        capacity: 4,
-        price: 999,
-        features: ['Ba\u00f1o', 'WiFi', 'Aire Acond', '2x Individual', 'Limpieza'],
-      },
-    ];
-  
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLayoutEffect } from 'react';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import RoomCard from '../../components/RoomCard';
+import BaseScreen from '../../components/BaseScreen';
+import useHotelById from '../../src/hooks/useHotelById';
+
+const { width } = Dimensions.get('window');
+
+export default function HotelScreen() {
+  const { id } = useLocalSearchParams();
+  const navigation = useNavigation();
+
+  const { hotel, loading, error } = useHotelById(id);
+
+  useLayoutEffect(() => {
+    if (hotel) {
+      navigation.setOptions({
+        title: hotel.name,
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => navigation.goBack()} className="pl-1">
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [hotel]);
+
+  if (loading) {
     return (
-      <ScrollView style={styles.container}>
-        {/* Carrusel decorativo */}
-        <View style={styles.carouselWrapper}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            style={styles.carousel}
-          >
-            {[1, 2, 3].map((i) => (
-              <Image
-                key={i}
-                source={require('../../assets/catedral.jpeg')}
-                style={styles.carouselImage}
-              />
-            ))}
-          </ScrollView>
-  
-          {/* Iconos de login y registro sobre la imagen */}
-          <View style={styles.authButtonsContainerAbsolute}>
-            <TouchableOpacity style={styles.authButton} onPress={() => router.push('/registro')}>
-              <FontAwesome name="user-plus" size={18} color="#fff" />
-              <Text style={[styles.authButtonText, { color: '#fff' }]}>Crear Cuenta</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.authButton} onPress={() => router.push('/login')}>
-              <FontAwesome name="user" size={18} color="#fff" />
-              <Text style={[styles.authButtonText, { color: '#fff' }]}>Iniciar Sesion</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-  
-        {/* Info del Hotel */}
-        <View style={styles.hotelInfo}>
-          <Text style={styles.hotelName}>{hotel.name}</Text>
-          <Text style={styles.hotelLocation}><FontAwesome name="map-marker" /> {hotel.location}</Text>
-          <Text style={styles.hotelPhone}><FontAwesome name="phone" /> {hotel.phone}</Text>
-        </View>
-  
-        {/* Habitaciones */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Habitaciones</Text>
-          <Text style={styles.sectionTitle}>Elige tu habitacion</Text>
-          <Text style={styles.sectionSubtitle}>Servicios Especiales no incluidos.</Text>
-        </View>
-  
-        <View style={styles.roomsContainer}>
-          {rooms.map((room) => (
-            <RoomCard key={room.id} room={room} />
-          ))}
-        </View>
-  
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2025 Hoteles de Morelia</Text>
-        </View>
-      </ScrollView>
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#4a7054" />
+      </View>
     );
   }
-  
-  const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
-    carouselWrapper: { position: 'relative' },
-    carousel: { width: '100%', height: 220 },
-    carouselImage: { width, height: 220, resizeMode: 'cover' },
-    authButtonsContainerAbsolute: {
-      position: 'absolute',
-      top: 20,
-      right: 20,
-      flexDirection: 'row',
-      gap: 12,
-      backgroundColor: 'rgba(0,0,0,0.3)',
-      padding: 6,
-      borderRadius: 10,
-    },
-    authButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    authButtonText: { fontSize: 12 },
-    hotelInfo: {
-      paddingHorizontal: 16,
-      marginTop: 20,
-    },
-    hotelName: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      color: '#222',
-    },
-    hotelLocation: { fontSize: 16, marginTop: 4 },
-    hotelPhone: { fontSize: 16, marginTop: 2 },
-    section: {
-      paddingHorizontal: 16,
-      marginTop: 24,
-    },
-    sectionLabel: {
-      fontSize: 14,
-      color: '#409eff',
-    },
-    sectionTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 4,
-    },
-    sectionSubtitle: {
-      fontSize: 12,
-      color: '#666',
-      marginBottom: 12,
-    },
-    roomsContainer: {
-      gap: 16,
-      paddingHorizontal: 16,
-      marginBottom: 32,
-    },
-    footer: {
-      backgroundColor: '#000',
-      padding: 20,
-      alignItems: 'center',
-    },
-    footerText: {
-      color: '#fff',
-      fontSize: 12,
-    },
-  });
-  
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-red-500 text-base">Error: {error}</Text>
+      </View>
+    );
+  }
+
+  if (!hotel) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-base text-gray-600">Hotel no encontrado</Text>
+      </View>
+    );
+  }
+
+  return (
+    <BaseScreen>
+      <ScrollView>
+        {/* Carrusel de imágenes */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          className="w-full h-56"
+        >
+          {hotel.images && hotel.images.length > 0 ? (
+            hotel.images.map((img, idx) => (
+              <Image
+                key={idx}
+                source={{ uri: img.image_url }}
+                style={{ width: width, height: 220 }}
+                resizeMode="cover"
+              />
+            ))
+          ) : (
+            <Image
+              source={require('../../assets/catedral.jpeg')}
+              className="w-full h-56"
+              style={{ width: width, height: 220 }}
+              resizeMode="cover"
+            />
+          )}
+        </ScrollView>
+
+        {/* Información del hotel */}
+        <View className="px-4 mt-4">
+          <Text className="text-2xl font-bold text-gray-800">{hotel.name}</Text>
+
+          <View className="flex-row items-center mt-2">
+            <FontAwesome name="map-marker" size={16} color="#666" />
+            <Text className="ml-2 text-sm text-gray-500">{hotel.location}</Text>
+          </View>
+
+          <View className="flex-row items-center mt-1">
+            <FontAwesome name="phone" size={16} color="#666" />
+            <Text className="ml-2 text-sm text-gray-500">{hotel.phone}</Text>
+          </View>
+
+          <Text className="text-base text-gray-700 mt-4 leading-relaxed">
+            {hotel.description}
+          </Text>
+        </View>
+
+        {/* Habitaciones */}
+        <View className="px-4 mt-6 mb-12">
+          <Text className="text-lg font-semibold text-gray-800 mb-3">Habitaciones</Text>
+          {hotel.rooms && hotel.rooms.length > 0 ? (
+            hotel.rooms.map((room) => (
+              <RoomCard key={room.id} room={room} hotelId={hotel.id} />
+            ))
+          ) : (
+            <Text className="text-gray-500">Este hotel aún no tiene habitaciones registradas.</Text>
+          )}
+        </View>
+      </ScrollView>
+    </BaseScreen>
+  );
+}
